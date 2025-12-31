@@ -27,7 +27,23 @@ This Repository contains my "Mastering MCP: Beginner to Pro Across the AI Ecosys
 
 **L) How is it trending on Github Stars**
 
+**II) MCP Architecture and Components**
 
+**A) Intro - MCP Architecture**
+
+**B) Core Architecture of MCP**
+
+**C) Key Components- Deep Dive**
+
+**D) What is JSON-RPC 2.0**
+
+**E) MCP Transport Layer**
+
+**F) Transport Mechanism - STDIO**
+
+**G) Transport Mechanism - SSE**
+
+**H) Transport Mechanism - Streamable HTTP**
 
 
 
@@ -292,3 +308,75 @@ For example, the pink graph represents Lama Index, which is a very popular frame
 Now, look at MCP—the red graph representing the Model Context Protocol servers repository. Its growth is explosive, like a rocket. Since its launch in November 2024, the trajectory has been almost vertical. By 2025, it has already crossed 50–60K stars, which is far higher than many older frameworks. The only project that could potentially catch up is A2A, Google’s Agent-to-Agent protocol, but for now, MCP clearly dominates in popularity.
 
 If we align the timeline, we can see that MCP achieved this level of adoption extremely quickly. Compare this to other frameworks that started in 2022 or 2023, and it’s clear why MCP has generated so much interest. This rapid adoption is precisely why this course exists—to help you understand MCP in depth and see how it works under the hood.
+
+# **II) MCP Architecture and Components**
+
+# **A) Intro - MCP Architecture**
+
+In this module, we’re diving into the beating heart of MCP—its architecture and transport mechanisms. This is where everything comes together and you truly understand how MCP enables models to interact with their runtime environments.
+
+We’ll start by looking at the MCP architecture. MCP isn’t just another protocol; it’s a flexible, modular bridge between models and the systems they operate in. Its design allows models to communicate in a structured, extensible, and transport-agnostic way.
+
+At its core, MCP follows a client–server architecture. The MCP client sends a request enriched with contextual information. The MCP server receives this request, processes it using a structured format—most commonly a JSON-RPC 2.0 message—and then returns a well-defined response back to the client.
+
+Next, we’ll take a deep dive into the key components of MCP. You can think of MCP as being built from three essential building blocks. First is the MCP server, which hosts the model or action logic. Second is the MCP client, responsible for sending requests and handling responses. Third is the transport layer, which governs how data flows between the client and the server.
+
+We’ll explore each of these components in detail, helping you understand not just how they work, but also how you can implement your own MCP pipeline from scratch.
+
+Starting with JSON-RPC, we’ll see how MCP leverages JSON-RPC 2.0—a lightweight protocol for remote procedure calls using JSON—to ensure consistent, structured communication between systems.
+
+Then we’ll move on to the MCP transport layer, which answers a crucial question: how do these requests and responses actually move between the client and the server?
+
+MCP doesn’t lock you into a single transport mechanism. It supports multiple options, starting with stdio (standard input/output). This is a simple and fast way for two processes to communicate, especially when they’re running on the same machine.
+
+We’ll also discuss Server-Sent Events (SSE)—sometimes referred to as TSS—which allows the server to push real-time updates to the client over HTTP. While powerful, this approach may be deprecated in the future.
+
+Finally, we’ll cover the recommended approach: Streamable HTTP. This is a robust and scalable option designed for stateless, web-based interactions. It’s particularly well-suited for production-grade systems, and we’ll even build an MCP server using Streamable HTTP in our hands-on demo.
+
+By the end of this module, you won’t just understand how MCP is built and how it communicates. You’ll also be confident in designing and implementing your own transport-aware MCP applications.
+
+# **B) Core Architecture of MCP**
+
+First and foremost, remember that MCP follows a client–server architecture. It’s a simple and intuitive setup: you have a client, and you have a server. This structure forms the foundation of how MCP works.
+
+By now, you should already know that MCP is a way for tools—such as AI assistants—to interact with structured data sources using a consistent and secure protocol. One important thing to note is that this entire architecture can run locally on your own computer. The client–server model does not strictly require the internet. Connecting to internet-based remote services is optional, not mandatory.
+
+In other words, even though MCP supports remote services, the same client–server interaction can happen entirely on your local machine. This makes MCP both flexible and powerful.
+
+Now let’s walk through the process step by step.
+
+In step one, a tool with an MCP client initiates a request. This “host with an MCP client” represents tools such as cloud desktops or IDEs like Visual Studio Code, Cursor, or Windsurf. These tools must be MCP-compliant, which is very important. Being MCP-compliant means they know how to send structured queries or commands using the MCP protocol.
+
+As you already know, the MCP protocol itself is built on JSON-RPC, which ensures that requests are structured, predictable, and standardized.
+
+In step two, the MCP client sends the request to the MCP server using the MCP protocol. This protocol acts as a bridge between the client and the server. It provides a standardized way to query or access different data services.
+
+Based on the request, it is routed to the appropriate MCP server. For example, if you ask, “Write me a poem and store it on my desktop,” the system knows it needs to communicate with a file system MCP server. If instead you ask for information about storage accounts in your Azure subscription, the request is routed to an Azure MCP server.
+
+There is typically a one-to-one relationship between an MCP server and the data source it manages. MCP Server A might be connected to local data source A and handle all operations related to that data. MCP Server B could be connected to a different local database. MCP Server C might represent a remote service, acting as a bridge between local tools and external web APIs.
+
+In the case of remote services, the MCP server communicates with external APIs over the internet, fetches the required data, and then relays the response back through the MCP protocol.
+
+Once the request reaches the correct MCP server, the server executes the query or action. Each server accesses its designated data source. Local data sources are queried directly, while remote data sources are accessed via API calls.
+
+After execution, the results flow back in the opposite direction. The data is returned from the data source to the MCP server, and then from the MCP server back to the MCP client. This two-way communication ensures that the client receives the final result in a structured and usable form.
+
+This entire process enables the tool or assistant to understand, analyze, and act on data effectively. The client might summarize results, analyze logs, store files, or generate helpful responses based on the returned data.
+
+To summarize, the MCP client acts as the requester—typically a tool or assistant. The MCP servers act as responders, each fetching or operating on data from their designated sources. The MCP protocol provides a standardized communication format between clients and servers. Finally, the data sources themselves can vary widely, ranging from local file systems and databases to third-party APIs.
+
+With this, you should now have a clear understanding of how MCP operates using a client–server architecture.
+
+# **C) Key Components- Deep Dive**
+
+
+
+# **D) What is JSON-RPC 2.0**
+
+# **E) MCP Transport Layer**
+
+# **F) Transport Mechanism - STDIO**
+
+# **G) Transport Mechanism - SSE**
+
+# **H) Transport Mechanism - Streamable HTTP**
