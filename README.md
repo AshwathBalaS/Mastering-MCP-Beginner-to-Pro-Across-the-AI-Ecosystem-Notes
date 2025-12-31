@@ -369,14 +369,138 @@ With this, you should now have a clear understanding of how MCP operates using a
 
 # **C) Key Components- Deep Dive**
 
+In the previous video, we established that MCP follows a client–server architecture. Now, we will take a deeper dive into this architecture to understand the key components involved and how they interact with each other.
 
+The diagram discussed explains the MCP architecture by breaking it down into the roles of the MCP client and the MCP server, and how they communicate through three core components. These three components are tools, resources, and prompts. We will go through each of these in detail.
+
+At a high level, let us first look at the MCP client. You can think of the MCP client as an AI agent that interacts with a language model (LM). The MCP client is responsible for interacting with the outside world or the application. It does this by invoking tools, meaning it can call specific tools and knows which tool to use when needed. The client has enough intelligence to determine the appropriate tool to invoke.
+
+In addition to invoking tools, the MCP client can also query resources. This is useful when you want to read data from a database or communicate with a specific MCP server. The client can also interpolate prompts, which means it can automatically fill in prompt templates. These are the primary responsibilities handled by the MCP client.
+
+Next, we look at the MCP server, which represents the application side of the architecture. The MCP server exposes functionality to the client. Traditionally, companies exposed APIs, but with MCP, there is a shift toward exposing MCP servers instead of APIs. This shift is significant because MCP servers expose tools, which are essentially functions that the model can invoke directly.
+
+The MCP server also exposes resources, which are structured data assets that the model can query. In this relationship, the server exposes resources while the client consumes them. Similarly, the server exposes prompt templates, and the client fills in these prompts. This is how the MCP client and MCP server communicate with each other.
+
+When we examine the components in more detail, the first component is tools. Tools are model-controlled, meaning the language model decides when and how to invoke them through the MCP client. Tools are simply functions that the model can execute. Examples include retrieving or searching for documents, finding relevant data, sending messages such as emails or notifications, or even updating records in a database. All of these actions are performed through tools invoked by the model.
+
+The second component is resources, which are application-controlled. Resources are data assets exposed to the model by the application. While the model can query these resources, they are still managed and structured by the server. The server remains in control of the data, and the model only consumes it.
+
+Examples of resources include files such as documents and spreadsheets, database records containing structured data, and even responses from third-party APIs. For instance, a weather API or any external service can act as a resource, providing live or stored data that the model can analyze.
+
+The third component is prompts, which are user-controlled. Prompts are predefined templates that guide the model’s behavior and instructions. They provide structured and consistent interactions. Examples include question-and-answer templates, prompts for extracting information from documents, or prompts for summarizing meetings or conversations. Prompts help enforce consistency in how the model responds.
+
+The output generated through MCP follows a structured format, typically using JSON, as defined by the JSON-RPC protocol. This ensures that responses are consistent and machine-readable.
+
+Looking at the overall flow, the MCP server defines and exposes tools, resources, and prompts. In this sense, it replaces the traditional API layer. The MCP client, often acting as an AI agent, accesses the server. Based on the user’s goal or input, the model performs three key actions: it selects or fills in a prompt, queries relevant resources, and invokes appropriate tools.
+
+This approach creates a structured and secure interaction model. The application remains in control of what the model can access and what actions it can perform. At the same time, the model retains autonomy in reasoning and decision-making, using only what is exposed through the MCP protocol.
+
+If this feels too deep or complex right now, the key takeaway is simple: MCP uses a client–server architecture where the server exposes tools, resources, and prompts, and the client consumes and uses them alongside a language model to generate responses.
+
+As mentioned, upcoming demos and deeper dives will make this architecture much clearer and help solidify your understanding of how MCP works in real-world scenarios.
 
 # **D) What is JSON-RPC 2.0**
 
+MCP stands for Model Context Protocol. In the initial lectures, we discussed what a protocol is, and we agreed that a protocol is essentially a set of rules. This naturally leads to the next question: what protocol does MCP use under the hood?
+
+Under the hood, MCP makes use of JSON-RPC. To understand this, we first need to understand what JSON is. JSON stands for JavaScript Object Notation. It is a lightweight data interchange format that is based on JavaScript syntax but is language-independent. This means JSON can be used in any programming language such as Python, Java, or C#. Because of its simplicity and flexibility, JSON is widely used for data exchange in APIs, configuration files, and databases.
+
+JSON-RPC builds on top of JSON. It is a lightweight remote procedure call (RPC) protocol encoded in JSON. RPC stands for Remote Procedure Call, which allows a client or programmer to call functions or procedures that exist on another system. In other words, you are invoking a function remotely, which is why it is called a remote procedure call. JSON handles the data format, and RPC handles the function invocation.
+
+MCP specifically uses JSON-RPC version 2.0, which is the most widely adopted and improved version of the protocol. JSON-RPC 2.0 introduced several important enhancements over version 1.0. These include notifications, which are requests that do not expect a response, batch processing, and standardized error handling. JSON-RPC 2.0 is lightweight, language-agnostic, and designed specifically for client–server communication, which aligns perfectly with the MCP architecture.
+
+The protocol is lightweight because it has minimal overhead and uses pure JSON. It is language-agnostic, meaning it works with any programming language that supports JSON, such as Java, C#, or Python. It follows the client–server model, where one side sends requests (the client) and the other side sends responses (the server). This makes it ideal for cloud applications, APIs, and inter-service communication.
+
+Now let’s look at the key features of JSON-RPC. First, it uses JSON as the data format for both requests and responses. All communication—sending requests and receiving responses—is done using JSON. This ensures consistency and simplicity.
+
+JSON-RPC supports requests, notifications, and batch requests. A request expects a response, such as calling a function and receiving a result. A notification, on the other hand, is a “fire-and-forget” call where no response is expected. Notifications are often used for logging or progress updates.
+
+Every JSON-RPC request includes a method name. The method represents the function being invoked. Requests may also include optional parameters, which are the inputs to the method. Additionally, each request contains an ID, which uniquely identifies the request. This ID is extremely important because it must match between the request and the corresponding response. The ID allows the client to associate a response with the original request.
+
+Responses in JSON-RPC contain either a result or an error object. If the method call succeeds, the response includes the result. If the call fails, the response includes an error object explaining what went wrong.
+
+To understand this better, consider a simple example. A client sends a request to a server using JSON-RPC. The request specifies the JSON-RPC version, an ID, a method name, and parameters. For example, the client might call a weather method with the parameter San Francisco, indicating that it wants weather information for that city.
+
+The server responds with a JSON message that again includes the JSON-RPC version and the same ID. The response contains the result, such as the temperature and weather conditions for San Francisco. The matching ID confirms that this response corresponds to the original request.
+
+JSON-RPC also supports notifications, which do not include an ID and therefore do not expect a response. For example, a server might send a notification with a method called progress and a message such as “processing data.” This is commonly used to inform the client about the status of an operation without requiring a reply.
+
+In summary, MCP relies on JSON-RPC to enable structured, lightweight, and language-independent communication between clients and servers. JSON-RPC provides a clean way for MCP clients and servers to interact, invoke methods, exchange data, and send notifications efficiently.
+
 # **E) MCP Transport Layer**
+
+After gaining a solid understanding of the protocol itself and having detailed discussions around JSON-RPC, it is now time to take a closer look at the MCP transport layer.
+
+According to the official MCP specification, the transport layer is responsible for handling message conversion, enabling communication, standardizing interfaces, and ensuring flexibility across different transport mechanisms. Let’s go through each of these responsibilities one by one.
+
+The first responsibility of the transport layer is message conversion. The transport layer converts MCP protocol messages into JSON-RPC 2.0 format for transmission. Once the message is processed, it converts the JSON-RPC response back into an MCP-compatible protocol message. This means there is a continuous back-and-forth conversion process. MCP protocol messages are transformed into JSON-RPC messages for transport, and JSON-RPC responses are then converted back into MCP protocol messages. The server processes return JSON-RPC responses, which the transport layer translates back into MCP-compatible messages that can be consumed by the AI model.
+
+The second responsibility is enabling communication. The transport layer manages the underlying mechanics of how messages are sent and received between MCP clients and MCP servers. For example, in a chat application, when a user sends a message, the transport layer ensures that the message is delivered to the server correctly. Similarly, any responses or notifications from the server are routed back to the client. This ensures a smooth, reliable, and seamless communication flow between both sides.
+
+The third responsibility is standardizing the interface. MCP provides a standardized way for applications to interact with external tools and resources, ensuring consistency across different implementations. For instance, whether you are using standard input/output (stdio) for local processes or HTTP with server-sent events (SSE) for remote communication, developers interact with the same consistent API-style interface. This greatly simplifies both integration and development, regardless of the underlying transport mechanism being used.
+
+Finally, the transport layer ensures flexibility. MCP supports multiple transport mechanisms, including stdio, HTTP, and HTTP with server-sent events (SSE), to accommodate various communication needs. For example, an AI model running on a local machine might use stdio for fast local interactions. The same model, when deployed in the cloud, could use HTTP with server-side events to communicate with remote services. Importantly, this flexibility is achieved without changing the core MCP logic.
+
+With this, you should now have a clear understanding of the MCP transport layer and its role in enabling flexible, standardized, and reliable communication within the MCP ecosystem.
 
 # **F) Transport Mechanism - STDIO**
 
+Now that we have studied the MCP transport layer, we know that two important transport mechanisms we need to understand are stdio (standard input/output) and SSE (server-sent events). Let’s start by looking at stdio in detail.
+
+Stdio, or standard input/output, enables communication through standard input and standard output streams. These streams act as channels through which one process sends input and receives output from another process. This mechanism is very commonly used and is especially popular for local process communication.
+
+Let’s look at the use cases where stdio is typically used.
+
+A very common use case is when you are building command-line tools. For example, if you are creating a CLI application, you naturally expect input from the user and produce output in the terminal. If this CLI tool interacts with an AI model, stdio becomes a natural choice for communication.
+
+Another common scenario is local integrations. Stdio is most often associated with local environments. For example, if you are integrating an AI model into a desktop application that works offline, stdio is a good fit. A practical example could be a desktop note-taking application that uses an AI model to summarize notes locally.
+
+Stdio is also useful when you need simple inter-process communication. If the task is lightweight and does not require complex networking or streaming, stdio is ideal. For instance, a small utility that performs calculations or basic data processing—such as a simple calculator that performs additions—can efficiently use stdio.
+
+Another important use case is when working with shell scripts. If you are automating tasks in a Unix or Linux environment using shell scripts, stdio is a natural choice. For example, a shell script might process text files and then pass the content to an AI model for summarization. The script sends input through standard input and receives the summarized output through standard output.
+
+In all of these scenarios, using the stdio transport with MCP enables efficient and straightforward communication between processes. This makes it especially well-suited for local integrations, scripting environments, and lightweight tools.
+
+You might now wonder how this looks in practice.
+
+Typically, you will see a pseudo-code setup where stdio is configured using server parameters. In this setup, you define a command—such as npm or another executable—and then pass arguments or options. For example, you might invoke an MCP server related to the file system and specify which directories are allowed for access. This is done by providing the command and a list of arguments that define how and where the MCP server operates.
+
+This structure aligns closely with what is shown in the official MCP documentation, where a command is defined along with the necessary arguments to control the behavior of the MCP server.
+
+At this stage, the key takeaway is to understand which transport mechanism is being used and why stdio is chosen in certain scenarios. For now, having a basic conceptual understanding of stdio as an MCP transport mechanism is sufficient.
+
 # **G) Transport Mechanism - SSE**
 
+The Model Context Protocol (MCP) facilitates communication between clients and servers using various transport mechanisms. So far, we have already studied stdio, which is commonly used for local integrations. Now we will talk about SSE, which stands for Server-Sent Events, and this transport mechanism is particularly suited for scenarios where the server needs to push updates to the client.
+
+In MCP, SSE enables server-to-client streaming. We usually call this streaming because the data flows continuously from the server to the client. At the same time, HTTP POST requests handle client-to-server communication. So the client sends requests using HTTP POST, and the server pushes updates back to the client using SSE.
+
+Now let’s look at the use cases where SSE is typically used. The first and most common use case is server-to-client streaming, where real-time updates are required. SSE is ideal when the server needs to send real-time data to the client, and the client does not require a continuous outgoing connection for sending messages. For example, you can imagine an AI assistant that provides real-time stock price updates. In this case, the server is constantly sending stock price changes to the client. The server streams these updates using SSE, and the client receives them as they occur, without needing to repeatedly poll the server. So the client is not continuously talking to or pulling data from the server; instead, the server proactively sends real-time updates to the client.
+
+Another important use case is working with restricted networks. SSE operates over standard HTTP, which makes it suitable for environments with strict network policies that may block non-HTTP protocols. A very good example is a corporate environment with restrictive firewalls. In such scenarios, an AI assistant can still receive updates from an MCP server using SSE over HTTP, ensuring compatibility with the network constraints while avoiding blocked protocols.
+
+The next use case is implementing simple real-time updates. SSE is very useful for applications that require straightforward real-time notifications without complex bidirectional communication. SSE provides an efficient and lightweight solution for this. For example, consider an AI-powered news aggregator. If you build a news aggregator agent that sends breaking news alerts to users, the server can push these news alerts to connected clients using SSE. The client displays the alerts as they arrive, without initiating repeated requests. Again, the client is not always initiating communication; instead, the server is actively sending updates whenever new information is available.
+
+In summary, SSE as a transport mechanism in MCP is advantageous when the primary requirement is server-to-client communication, when applications need to operate within networks that restrict non-HTTP protocols, and when implementing systems that require simple real-time updates without complex two-way communication.
+
+Now, let’s briefly look at how this looks in practice. In a typical setup, you specify an SSE-based MCP client using an HTTP endpoint, for example http://localhost:<port>/sse. In the code snippets we will be running, you will see configurations where an MCP remote is specified as an argument. For example, you might call a remote MCP server using a URL like https://mcp.paypal.com. These examples are meant to demonstrate how SSE endpoints are defined and how MCP clients connect to remote MCP servers using HTTP and SSE.
+
+So, overall, this is how Server-Sent Events (SSE) work as a transport mechanism in MCP, and why they are especially useful for real-time, server-driven communication scenarios.
+
 # **H) Transport Mechanism - Streamable HTTP**
+
+Hi folks, welcome back. In the MCP world, things are evolving very quickly. A few days ago, we learned about SSE or Server-Sent Events. However, that transport mechanism is soon becoming legacy and will be deprecated. So, what is it being replaced with? The answer is Streamable HTTP.
+
+Streamable HTTP is the modern remote transport mechanism for MCP, introduced in the March 2025 update of the protocol. It replaces the older two-endpoint TSS-based approach. Previously, TSS required a two-endpoint design for handling requests and responses, but Streamable HTTP simplifies this with a single endpoint that combines request and response streams over standard HTTP.
+
+Here’s how Streamable HTTP works: it uses a single HTTP endpoint to handle both HTTP POST and HTTP GET. The client sends JSON-RPC requests or batches via POST, indicating support for application and event streams in the Accept header. If the server supports streaming or needs to send notifications back to the client, it responds to the GET request using Server-Sent Events over the same endpoint. This is a key difference from the old SSE approach, where multiple endpoints were needed.
+
+Streamable HTTP is a standardized and unified protocol. It defines transport using HTTP POST and GET with JSON-RPC, and optionally supports SSE. Security is built in, with features like HTTP security practices, origin validation, CORS, and authentication headers, which ensure that client-server messages are protected. This allows secure two-way data flow, maintaining privacy while enabling powerful integrations.
+
+Streamable HTTP also provides real-time capabilities, supporting bidirectional streaming through Server-Sent Events over the same endpoint. This is particularly important for applications that require continuous updates from server to client and vice versa.
+
+Use cases for Streamable HTTP typically involve scenarios where your MCP server is running on a cloud VM or virtual machine, and the client needs to connect to that HTTP endpoint. It simplifies communication between client and server while maintaining security and real-time interaction. Demos will soon be provided to show how to run an MCP server inside the cloud or a virtual machine and connect to it from a client using HTTP.
+
+Another important advantage of Streamable HTTP is universal compatibility. Since it works over plain HTTP, it is compatible with existing middleware infrastructure and stateless, serverless platforms. This makes it suitable for a wide range of AI applications, including chatbots, ID assistants, and many more.
+
+In summary, while SSE has been widely used, the way forward in MCP transport is Streamable HTTP. It simplifies endpoint management, supports real-time bidirectional streaming, ensures secure communication, and offers broad compatibility across platforms.
